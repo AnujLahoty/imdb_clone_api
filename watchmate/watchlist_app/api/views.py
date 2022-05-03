@@ -8,10 +8,11 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from watchlist_app.api.permissions import AdminOrReadOnly, ReviewUserOrReadOnly
+from watchlist_app.api.permissions import IsAdminOrReadOnly, IsReviewUserOrReadOnly
 
 class ReviewsCreate(generics.CreateAPIView):
     serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         return Reviews.objects.all()
@@ -26,6 +27,15 @@ class ReviewsCreate(generics.CreateAPIView):
         if review_queryset.exists():
             raise ValidationError("You had already reviewed the movie!")
         
+        if watchlist.number_rating == 0:
+            watchlist.avg_rating = serializer.validated_data['rating']
+            
+        else:
+            watchlist.avg_rating = (watchlist.avg_rating + serializer.validated_data['rating'])/2 
+            
+        watchlist.number_rating += 1
+        watchlist.save()    
+    
         serializer.save(watchlist=watchlist, review_user=review_user)
 
 class ReviewsList(generics.ListAPIView):
@@ -41,7 +51,7 @@ class ReviewsList(generics.ListAPIView):
 class ReviewsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Reviews.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [ReviewUserOrReadOnly]
+    permission_classes = [IsReviewUserOrReadOnly]
 
 # class ReviewsList(mixins.ListModelMixin,
 #                   mixins.CreateModelMixin,
@@ -75,6 +85,7 @@ class ReviewsDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class WatchListAV(APIView):
+    permission_classes = [IsAdminOrReadOnly]
     def get(self, request, *args, **kwargs):
         movies = WatchList.objects.all()
         serializer = WatchListSerializer(movies, many=True)
@@ -89,6 +100,7 @@ class WatchListAV(APIView):
             return Response(serializer.errors)
         
 class WatchDetailAV(APIView):
+    permission_classes = [IsAdminOrReadOnly]
     
     def get(self, request, pk):
         try:
