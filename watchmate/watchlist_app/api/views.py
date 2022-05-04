@@ -85,6 +85,7 @@ class ReviewsDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class WatchListAV(APIView):
+    
     permission_classes = [IsAdminOrReadOnly]
     def get(self, request, *args, **kwargs):
         movies = WatchList.objects.all()
@@ -126,6 +127,7 @@ class WatchDetailAV(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 class StreamPlatformListAV(APIView):
+    permission_classes = [IsAdminOrReadOnly]
     
     def get(self, request):
         platform = StreamPlatform.objects.all()
@@ -143,6 +145,7 @@ class StreamPlatformListAV(APIView):
         
        
 class StreamPlatformDetailAV(APIView): 
+    permission_classes = [IsAdminOrReadOnly]
     
     def get(self, request, pk):
         try:
