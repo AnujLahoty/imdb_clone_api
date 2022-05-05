@@ -7,7 +7,7 @@ class IsAdminOrReadOnly(permissions.IsAdminUser):
         if request.method in permissions.SAFE_METHODS:
             return True
         else:
-            return bool(request.user and request.user.is_staff)
+            return bool(request.user and request.user.is_staff) # This measn we need to be admin only to post any info at this URL which uses this permission
 
 
 class IsReviewUserOrReadOnly(permissions.BasePermission):
